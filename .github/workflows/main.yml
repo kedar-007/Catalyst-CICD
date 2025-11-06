@@ -55,25 +55,25 @@ jobs:
           echo "✅ Backend dependencies installed successfully."
 
       # ===== 6️⃣ Deploy to Zoho Catalyst =====
-      - name: 🚀 Deploying to Zoho Catalyst
-        env:
-          CATALYST_PROJECT_NAME: ${{ secrets.CATALYST_PROJECT_NAME }}
-          CATALYST_ORG: ${{ secrets.CATALYST_ORG }}
-          CATALYST_TOKEN: ${{ secrets.CATALYST_TOKEN }}
+      - name: 🚀 Deploy to Zoho Catalyst
         run: |
           echo "--------------------------------------------"
           echo "🚀 STEP 6: Deploying to Zoho Catalyst"
           echo "--------------------------------------------"
           echo "🔍 Verifying Catalyst credentials..."
-          echo "Project Name: $CATALYST_PROJECT_NAME"
-          echo "Org ID:        $CATALYST_ORG"
+          echo "Project Name: ${{ secrets.CATALYST_PROJECT_NAME }}"
+          echo "Org ID:        ${{ secrets.CATALYST_ORG_ID }}"
           echo "Token Length:  ${#CATALYST_TOKEN}"
-          echo "Current Commit: $(git rev-parse --short HEAD)"
+          echo "Current Commit: ${{ github.sha }}"
           echo "--------------------------------------------"
-
-          echo "Starting deployment to Zoho Catalyst..."
-          catalyst deploy --project ${{ secrets.CATALYST_PROJECT_NAME }} --org ${{ secrets.CATALYST_ORG }} --token ${{ secrets.CATALYST_TOKEN }}
-          echo "✅ Catalyst deployment completed successfully."
+          
+          echo "🪶 Starting deployment..."
+          catalyst deploy --project "${{ secrets.CATALYST_PROJECT_NAME }}" \
+            --org "${{ secrets.CATALYST_ORG_ID }}" \
+            --token "${{ secrets.CATALYST_TOKEN }}" \
+            --verbose
+        env:
+          CATALYST_TOKEN: ${{ secrets.CATALYST_TOKEN }}
 
       # ===== 7️⃣ Create Release Directory =====
       - name: 📁 Creating Release Directory
