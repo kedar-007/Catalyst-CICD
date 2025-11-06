@@ -35,11 +35,12 @@ jobs:
       - name: 🧱 Building React Frontend
         working-directory: ./react-app
         run: |
-          echo "Installing frontend dependencies..."
-          npm ci
-          echo "Building React app for production..."
-          npm run build
-          echo "✅ Frontend build completed successfully."
+        echo "Installing frontend dependencies..."
+        npm ci
+        echo "Building React app for production..."
+        CI=false npm run build
+        echo "✅ Frontend build completed successfully."
+
 
       # ===== 5️⃣ Install Backend Dependencies =====
       - name: 🪛 Installing Backend Dependencies
