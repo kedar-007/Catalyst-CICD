@@ -3,7 +3,7 @@ name: Catalyst App Deployment
 on:
   push:
     branches:
-      - main   # Trigger only when code is pushed to main branch
+      - main   # ✅ Trigger only when code is pushed to main branch
 
 jobs:
   build:
@@ -27,7 +27,9 @@ jobs:
       # ===== 3️⃣ Install Catalyst CLI =====
       - name: ⚙️ Installing Zoho Catalyst CLI
         run: |
-          echo "Installing Zoho Catalyst CLI..."
+          echo "--------------------------------------------"
+          echo "⚙️ STEP 3: Installing Zoho Catalyst CLI"
+          echo "--------------------------------------------"
           npm install -g zcatalyst-cli@latest
           echo "✅ Catalyst CLI installed successfully."
 
@@ -56,24 +58,33 @@ jobs:
 
       # ===== 6️⃣ Deploy to Zoho Catalyst =====
       - name: 🚀 Deploy to Zoho Catalyst
+        env:
+          CATALYST_ORG: ${{ secrets.CATALYST_ORG }}
+          CATALYST_PROJECT_NAME: ${{ secrets.CATALYST_PROJECT_NAME }}
+          CATALYST_TOKEN: ${{ secrets.CATALYST_TOKEN }}
         run: |
           echo "--------------------------------------------"
           echo "🚀 STEP 6: Deploying to Zoho Catalyst"
           echo "--------------------------------------------"
           echo "🔍 Verifying Catalyst credentials..."
-          echo "Project Name: ${{ secrets.CATALYST_PROJECT_NAME }}"
-          echo "Org ID:        ${{ secrets.CATALYST_ORG_ID }}"
+          echo "Project Name: $CATALYST_PROJECT_NAME"
+          echo "Org ID:        $CATALYST_ORG"
           echo "Token Length:  ${#CATALYST_TOKEN}"
           echo "Current Commit: ${{ github.sha }}"
           echo "--------------------------------------------"
-          
+
+          if [ -z "$CATALYST_ORG" ] || [ -z "$CATALYST_PROJECT_NAME" ]; then
+            echo "❌ Error: Missing Org or Project Name!"
+            exit 1
+          fi
+
           echo "🪶 Starting deployment..."
-          catalyst deploy --project "${{ secrets.CATALYST_PROJECT_NAME }}" \
-            --org "${{ secrets.CATALYST_ORG_ID }}" \
-            --token "${{ secrets.CATALYST_TOKEN }}" \
+          catalyst deploy \
+            --project "$CATALYST_PROJECT_NAME" \
+            --org "$CATALYST_ORG" \
+            --token "$CATALYST_TOKEN" \
             --verbose
-        env:
-          CATALYST_TOKEN: ${{ secrets.CATALYST_TOKEN }}
+          echo "✅ Catalyst deployment completed successfully."
 
       # ===== 7️⃣ Create Release Directory =====
       - name: 📁 Creating Release Directory
