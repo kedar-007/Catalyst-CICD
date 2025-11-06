@@ -72,13 +72,7 @@ jobs:
           echo "--------------------------------------------"
 
           echo "Starting deployment to Zoho Catalyst..."
-          catalyst deploy \
-            --project "$CATALYST_PROJECT_NAME" \
-            --org "$CATALYST_ORG" \
-            --token "$CATALYST_TOKEN" || {
-              echo "❌ Catalyst deployment failed. Please verify credentials.";
-              exit 1;
-            }
+          catalyst deploy --project ${{ secrets.CATALYST_PROJECT_NAME }} --org ${{ secrets.CATALYST_ORG }} --token ${{ secrets.CATALYST_TOKEN }}
           echo "✅ Catalyst deployment completed successfully."
 
       # ===== 7️⃣ Create Release Directory =====
