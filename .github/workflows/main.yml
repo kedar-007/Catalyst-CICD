@@ -3,7 +3,7 @@ name: Catalyst App Deployment
 on:
   push:
     branches:
-      - main  
+      - main
 
 jobs:
   build:
@@ -12,28 +12,33 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # ===== Clone Repository =====
+      # ===== 1️⃣ Clone Repository =====
       - name: Cloning Repository
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      # ===== Setup Node =====
+      # ===== 2️⃣ Setup Node =====
       - name: Setting up Node 18
         uses: actions/setup-node@v3
         with:
           node-version: '18'
 
-      # ===== Install Catalyst CLI =====
+      # ===== 3️⃣ Install Catalyst CLI =====
       - name: Installing Zoho Catalyst CLI
         run: |
           echo "--------------------------------------------"
           echo "STEP 3: Installing Zoho Catalyst CLI"
           echo "--------------------------------------------"
           npm install -g zcatalyst-cli@latest
-          echo "Catalyst CLI installed successfully."
+          echo "✅ Catalyst CLI installed successfully."
+          echo "--------------------------------------------"
+          echo "Checking Catalyst CLI version..."
+          catalyst --version || { echo '❌ Catalyst CLI not found!'; exit 1; }
+          echo "✅ Catalyst CLI verified successfully."
+          echo "--------------------------------------------"
 
-      # ===== Build React Frontend =====
+      # ===== 4️⃣ Build React Frontend =====
       - name: Building React Frontend
         working-directory: ./react-app
         run: |
@@ -42,11 +47,13 @@ jobs:
           echo "--------------------------------------------"
           echo "Installing frontend dependencies..."
           npm ci
-          echo "Building React app for production (CI=false)..."
+          echo "✅ Frontend dependencies installed."
+          echo "Building React app for production..."
           CI=false npm run build
-          echo "Frontend build completed successfully."
+          echo "✅ Frontend build completed successfully."
+          echo "--------------------------------------------"
 
-      # ===== Install Backend Dependencies =====
+      # ===== 5️⃣ Install Backend Dependencies =====
       - name: Installing Backend Dependencies
         working-directory: ./functions/ci_cd_function
         run: |
@@ -54,14 +61,15 @@ jobs:
           echo "STEP 5: Installing Backend Dependencies"
           echo "--------------------------------------------"
           npm ci --omit=dev
-          echo "Backend dependencies installed successfully."
+          echo "✅ Backend dependencies installed successfully."
+          echo "--------------------------------------------"
 
-      # ===== Deploy to Zoho Catalyst =====
+      # ===== 6️⃣ Deploy to Zoho Catalyst =====
       - name: Deploy to Zoho Catalyst
         env:
-          CATALYST_ORG: ${{ secrets.CATALYST_ORG }}
-          CATALYST_PROJECT_NAME: ${{ secrets.CATALYST_PROJECT_NAME }}
-          CATALYST_TOKEN: ${{ secrets.CATALYST_TOKEN }}
+          CATALYST_ORG: ${{ secrets.CATALYST_ORG || vars.CATALYST_ORG }}
+          CATALYST_PROJECT_NAME: ${{ secrets.CATALYST_PROJECT_NAME || vars.CATALYST_PROJECT_NAME }}
+          CATALYST_TOKEN: ${{ secrets.CATALYST_TOKEN || vars.CATALYST_TOKEN }}
         run: |
           echo "--------------------------------------------"
           echo "STEP 6: Deploying to Zoho Catalyst"
@@ -72,9 +80,15 @@ jobs:
           echo "Token Length:  ${#CATALYST_TOKEN}"
           echo "Current Commit: ${{ github.sha }}"
           echo "--------------------------------------------"
+
+          # Validate that required environment variables exist
+          if [ -z "$CATALYST_ORG" ] || [ -z "$CATALYST_PROJECT_NAME" ] || [ -z "$CATALYST_TOKEN" ]; then
+            echo "❌ ERROR: Missing Catalyst credentials (Org / Project / Token)"
+            exit 1
+          fi
+
+          echo "✅ All Catalyst credentials verified."
           echo "Starting deployment..."
+
           catalyst deploy \
-            --project "$CATALYST_PROJECT_NAME" \
-            --org "$CATALYST_ORG" \
-            --token "$CATALYST_TOKEN" 
-          echo "Catalyst deployment completed successfully."
+            --project "$CATALYST_PROJEC_
