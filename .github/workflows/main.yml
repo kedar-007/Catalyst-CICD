@@ -1,0 +1,115 @@
+name: Catalyst App Deployment
+
+on:
+  push:
+    branches:
+      - main   # Trigger only when code is pushed to main branch
+
+jobs:
+  build:
+    environment: Production
+    name: Building and Deploying Catalyst App (Frontend + Backend)
+    runs-on: ubuntu-latest
+
+    steps:
+      # ===== 1️⃣ Clone Repository =====
+      - name: 🧩 Cloning Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      # ===== 2️⃣ Setup Node =====
+      - name: 🛠️ Setting up Node 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      # ===== 3️⃣ Install Catalyst CLI =====
+      - name: ⚙️ Installing Zoho Catalyst CLI
+        run: |
+          echo "Installing Zoho Catalyst CLI..."
+          npm install -g zcatalyst-cli@latest
+          echo "✅ Catalyst CLI installed successfully."
+
+      # ===== 4️⃣ Build React Frontend =====
+      - name: 🧱 Building React Frontend
+        working-directory: ./react-app
+        run: |
+          echo "Installing frontend dependencies..."
+          npm ci
+          echo "Building React app for production..."
+          npm run build
+          echo "✅ Frontend build completed successfully."
+
+      # ===== 5️⃣ Install Backend Dependencies =====
+      - name: 🪛 Installing Backend Dependencies
+        working-directory: ./functions/ci_cd_function
+        run: |
+          echo "Installing backend dependencies..."
+          npm ci --omit=dev
+          echo "✅ Backend dependencies installed successfully."
+
+      # ===== 6️⃣ Deploy to Zoho Catalyst =====
+      - name: 🚀 Deploying to Zoho Catalyst
+        run: |
+          echo "Starting deployment to Zoho Catalyst..."
+          catalyst deploy \
+            --project ${{ secrets.CATALYST_PROJECT_NAME }} \
+            --org ${{ secrets.CATALYST_ORG }} \
+            --token ${{ secrets.CATALYST_TOKEN }}
+          echo "✅ Catalyst deployment completed successfully."
+
+      # ===== 7️⃣ Create Release Directory =====
+      - name: 📁 Creating Release Directory
+        run: |
+          echo "Preparing release artifacts..."
+          mkdir -p release/functions release/frontend
+          echo "✅ Release directories created."
+
+      # ===== 8️⃣ Zip Backend Function =====
+      - name: 🗜️ Creating Zip for Backend Function
+        working-directory: ./functions/ci_cd_function
+        run: |
+          echo "Zipping backend function..."
+          zip -r ../../release/functions/ci_cd_function.zip .
+          echo "✅ Backend function zip created successfully."
+
+      # ===== 9️⃣ Zip Frontend Build =====
+      - name: 🗜️ Creating Zip for Frontend Build
+        working-directory: ./react-app/build
+        run: |
+          echo "Zipping frontend build..."
+          zip -r ../../../release/frontend/frontend_build.zip .
+          echo "✅ Frontend build zip created successfully."
+
+      # ===== 🔟 Copy Catalyst Project File =====
+      - name: 📦 Copying catalyst.json
+        run: |
+          echo "Copying catalyst.json into release..."
+          cp catalyst.json release/catalyst.json
+          echo "✅ catalyst.json copied successfully."
+
+      # ===== 11️⃣ Generate Final Release ZIP =====
+      - name: 📚 Generating Final Release Package
+        run: |
+          echo "Creating final release.zip..."
+          cd release && zip -r release.zip .
+          echo "✅ Final release.zip generated successfully."
+
+      # ===== 12️⃣ Upload Release Artifact =====
+      - name: 🏁 Uploading Build Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: catalyst-release
+          path: ./release/release.zip
+
+      # ===== 13️⃣ Final Log Summary =====
+      - name: 🧾 Print Deployment Summary
+        run: |
+          echo "------------------------------------------"
+          echo "✅ Zoho Catalyst CI/CD Workflow Completed"
+          echo "Project: ${{ secrets.CATALYST_PROJECT_NAME }}"
+          echo "Org ID:  ${{ secrets.CATALYST_ORG }}"
+          echo "Branch:  main"
+          echo "Function: functions/ci_cd_function"
+          echo "------------------------------------------"
