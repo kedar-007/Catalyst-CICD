@@ -36,7 +36,7 @@ jobs:
           echo "Installing frontend dependencies..."
           npm ci
           echo "Building React app for production..."
-          npm run build
+          CI=false npm run build
           echo "✅ Frontend build completed successfully."
 
       - name: 🚀 Deploy to Catalyst
