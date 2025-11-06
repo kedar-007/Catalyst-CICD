@@ -35,9 +35,12 @@ jobs:
       - name: 🧱 Building React Frontend
         working-directory: ./react-app
         run: |
+          echo "--------------------------------------------"
+          echo "📦 STEP 4: Building React Frontend"
+          echo "--------------------------------------------"
           echo "Installing frontend dependencies..."
           npm ci
-          echo "Building React app for production..."
+          echo "Building React app for production (CI=false)..."
           CI=false npm run build
           echo "✅ Frontend build completed successfully."
 
@@ -45,24 +48,45 @@ jobs:
       - name: 🪛 Installing Backend Dependencies
         working-directory: ./functions/ci_cd_function
         run: |
-          echo "Installing backend dependencies..."
+          echo "--------------------------------------------"
+          echo "🧩 STEP 5: Installing Backend Dependencies"
+          echo "--------------------------------------------"
           npm ci --omit=dev
           echo "✅ Backend dependencies installed successfully."
 
       # ===== 6️⃣ Deploy to Zoho Catalyst =====
       - name: 🚀 Deploying to Zoho Catalyst
+        env:
+          CATALYST_PROJECT_NAME: ${{ secrets.CATALYST_PROJECT_NAME }}
+          CATALYST_ORG: ${{ secrets.CATALYST_ORG }}
+          CATALYST_TOKEN: ${{ secrets.CATALYST_TOKEN }}
         run: |
+          echo "--------------------------------------------"
+          echo "🚀 STEP 6: Deploying to Zoho Catalyst"
+          echo "--------------------------------------------"
+          echo "🔍 Verifying Catalyst credentials..."
+          echo "Project Name: $CATALYST_PROJECT_NAME"
+          echo "Org ID:        $CATALYST_ORG"
+          echo "Token Length:  ${#CATALYST_TOKEN}"
+          echo "Current Commit: $(git rev-parse --short HEAD)"
+          echo "--------------------------------------------"
+
           echo "Starting deployment to Zoho Catalyst..."
           catalyst deploy \
-            --project ${{ secrets.CATALYST_PROJECT_NAME }} \
-            --org ${{ secrets.CATALYST_ORG }} \
-            --token ${{ secrets.CATALYST_TOKEN }}
+            --project "$CATALYST_PROJECT_NAME" \
+            --org "$CATALYST_ORG" \
+            --token "$CATALYST_TOKEN" || {
+              echo "❌ Catalyst deployment failed. Please verify credentials.";
+              exit 1;
+            }
           echo "✅ Catalyst deployment completed successfully."
 
       # ===== 7️⃣ Create Release Directory =====
       - name: 📁 Creating Release Directory
         run: |
-          echo "Preparing release artifacts..."
+          echo "--------------------------------------------"
+          echo "📦 STEP 7: Preparing release artifacts"
+          echo "--------------------------------------------"
           mkdir -p release/functions release/frontend
           echo "✅ Release directories created."
 
@@ -70,7 +94,9 @@ jobs:
       - name: 🗜️ Creating Zip for Backend Function
         working-directory: ./functions/ci_cd_function
         run: |
-          echo "Zipping backend function..."
+          echo "--------------------------------------------"
+          echo "🗜️ STEP 8: Zipping backend function"
+          echo "--------------------------------------------"
           zip -r ../../release/functions/ci_cd_function.zip .
           echo "✅ Backend function zip created successfully."
 
@@ -78,21 +104,27 @@ jobs:
       - name: 🗜️ Creating Zip for Frontend Build
         working-directory: ./react-app/build
         run: |
-          echo "Zipping frontend build..."
+          echo "--------------------------------------------"
+          echo "🗜️ STEP 9: Zipping frontend build"
+          echo "--------------------------------------------"
           zip -r ../../../release/frontend/frontend_build.zip .
           echo "✅ Frontend build zip created successfully."
 
       # ===== 🔟 Copy Catalyst Project File =====
       - name: 📦 Copying catalyst.json
         run: |
-          echo "Copying catalyst.json into release..."
+          echo "--------------------------------------------"
+          echo "📦 STEP 10: Copying catalyst.json"
+          echo "--------------------------------------------"
           cp catalyst.json release/catalyst.json
           echo "✅ catalyst.json copied successfully."
 
       # ===== 11️⃣ Generate Final Release ZIP =====
       - name: 📚 Generating Final Release Package
         run: |
-          echo "Creating final release.zip..."
+          echo "--------------------------------------------"
+          echo "📚 STEP 11: Generating Final Release Package"
+          echo "--------------------------------------------"
           cd release && zip -r release.zip .
           echo "✅ Final release.zip generated successfully."
 
@@ -106,10 +138,12 @@ jobs:
       # ===== 13️⃣ Final Log Summary =====
       - name: 🧾 Print Deployment Summary
         run: |
-          echo "------------------------------------------"
+          echo "--------------------------------------------"
           echo "✅ Zoho Catalyst CI/CD Workflow Completed"
+          echo "--------------------------------------------"
           echo "Project: ${{ secrets.CATALYST_PROJECT_NAME }}"
           echo "Org ID:  ${{ secrets.CATALYST_ORG }}"
           echo "Branch:  main"
           echo "Function: functions/ci_cd_function"
-          echo "------------------------------------------"
+          echo "Commit: $(git rev-parse --short HEAD)"
+          echo "--------------------------------------------"
