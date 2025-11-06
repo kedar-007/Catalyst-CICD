@@ -1,43 +1,80 @@
-name: Catalyst CI/CD Pipeline
+name: Catalyst App Deployment
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main  
 
 jobs:
-  build-and-deploy:
+  build:
+    environment: Production
+    name: Building and Deploying Catalyst App (Frontend + Backend)
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      # ===== Clone Repository =====
+      - name: Cloning Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
-      - name: ⚙️ Setup Node.js
-        uses: actions/setup-node@v4
+      # ===== Setup Node =====
+      - name: Setting up Node 18
+        uses: actions/setup-node@v3
         with:
           node-version: '18'
 
-      - name: 🪄 Install Catalyst CLI
-        run: npm install -g zcatalyst-cli
-
-      - name: Verify Environment Variables
+      # ===== Install Catalyst CLI =====
+      - name: Installing Zoho Catalyst CLI
         run: |
-          echo "Project: ${{ secrets.CATALYST_PROJECT_NAME }}"
-          echo "Org ID: ${{ secrets.CATALYST_ORG_ID }}"
-          echo "Token starts with: ${CATALYST_TOKEN:0:8}..."
-        env:
-          CATALYST_PROJECT_NAME: ${{ secrets.CATALYST_PROJECT_NAME }}
-          CATALYST_ORG_ID: ${{ secrets.CATALYST_ORG_ID }}
-          CATALYST_TOKEN: ${{ secrets.CATALYST_TOKEN }}
+          echo "--------------------------------------------"
+          echo "STEP 3: Installing Zoho Catalyst CLI"
+          echo "--------------------------------------------"
+          npm install -g zcatalyst-cli@latest
+          echo "Catalyst CLI installed successfully."
 
-      - name: Build React Frontend
+      # ===== Build React Frontend =====
+      - name: Building React Frontend
         working-directory: ./react-app
         run: |
+          echo "--------------------------------------------"
+          echo "STEP 4: Building React Frontend"
+          echo "--------------------------------------------"
           echo "Installing frontend dependencies..."
           npm ci
-          echo "Building React app for production..."
+          echo "Building React app for production (CI=false)..."
           CI=false npm run build
           echo "Frontend build completed successfully."
 
-      - name: 🚀 Deploy to Catalyst
-        run: catalyst deploy --project ${{ secrets.CATALYST_PROJECT_NAME }} --org ${{ secrets.CATALYST_ORG }} --token ${{ secrets.CATALYST_TOKEN }}
+      # ===== Install Backend Dependencies =====
+      - name: Installing Backend Dependencies
+        working-directory: ./functions/ci_cd_function
+        run: |
+          echo "--------------------------------------------"
+          echo "STEP 5: Installing Backend Dependencies"
+          echo "--------------------------------------------"
+          npm ci --omit=dev
+          echo "Backend dependencies installed successfully."
+
+      # ===== Deploy to Zoho Catalyst =====
+      - name: Deploy to Zoho Catalyst
+        env:
+          CATALYST_ORG: ${{ secrets.CATALYST_ORG }}
+          CATALYST_PROJECT_NAME: ${{ secrets.CATALYST_PROJECT_NAME }}
+          CATALYST_TOKEN: ${{ secrets.CATALYST_TOKEN }}
+        run: |
+          echo "--------------------------------------------"
+          echo "STEP 6: Deploying to Zoho Catalyst"
+          echo "--------------------------------------------"
+          echo "Verifying Catalyst credentials..."
+          echo "Project Name: $CATALYST_PROJECT_NAME"
+          echo "Org ID:        $CATALYST_ORG"
+          echo "Token Length:  ${#CATALYST_TOKEN}"
+          echo "Current Commit: ${{ github.sha }}"
+          echo "--------------------------------------------"
+          echo "Starting deployment..."
+          catalyst deploy \
+            --project "$CATALYST_PROJECT_NAME" \
+            --org "$CATALYST_ORG" \
+            --token "$CATALYST_TOKEN" 
+          echo "Catalyst deployment completed successfully."
