@@ -98,7 +98,7 @@ jobs:
 
       # ===== 12️⃣ Upload Release Artifact =====
       - name: 🏁 Uploading Build Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: catalyst-release
           path: ./release/release.zip
