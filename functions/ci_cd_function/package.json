@@ -1,0 +1,11 @@
+{
+	"name": "ci_cd_function",
+	"version": "1.0.0",
+	"main": "index.js",
+	"author": "catalystadmin@dsv360.ai",
+	"dependencies": {
+		"body-parser": "^2.2.0",
+		"express": "^5.1.0",
+		"zcatalyst-sdk-node": "latest"
+	}
+}
