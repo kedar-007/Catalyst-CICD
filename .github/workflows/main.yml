@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 🧰 Checkout Code
+      - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: ⚙️ Setup Node.js
@@ -20,7 +20,7 @@ jobs:
       - name: 🪄 Install Catalyst CLI
         run: npm install -g zcatalyst-cli
 
-      - name: 🔍 Verify Environment Variables
+      - name: Verify Environment Variables
         run: |
           echo "Project: ${{ secrets.CATALYST_PROJECT_NAME }}"
           echo "Org ID: ${{ secrets.CATALYST_ORG_ID }}"
@@ -30,25 +30,14 @@ jobs:
           CATALYST_ORG_ID: ${{ secrets.CATALYST_ORG_ID }}
           CATALYST_TOKEN: ${{ secrets.CATALYST_TOKEN }}
 
-      - name: 🧱 Build React Frontend
+      - name: Build React Frontend
         working-directory: ./react-app
         run: |
           echo "Installing frontend dependencies..."
           npm ci
           echo "Building React app for production..."
           CI=false npm run build
-          echo "✅ Frontend build completed successfully."
+          echo "Frontend build completed successfully."
 
-      - name: 🚀 Deploy to Zoho Catalyst (Temporary Hardcoded)
-        run: |
-          echo "--------------------------------------------"
-          echo "🚀 STEP 6: Deploying to Zoho Catalyst (Temporary Hardcoded)"
-          echo "--------------------------------------------"
-          echo "Using hardcoded credentials for testing..."
-          catalyst deploy \
-            --project "CI-CD" \
-            --org "60040289923" \
-            --token "m_1004.6798bf661903580989f8b9276ae7b966.dcf1e8be121bd4e2b3edc3452d2c5bdb" \
-            --verbose
-          echo "✅ Deployment finished successfully."
-
+      - name: 🚀 Deploy to Catalyst
+        run: run: catalyst deploy --project ${{ secrets.CATALYST_PROJECT_NAME }} --org ${{ secrets.CATALYST_ORG }} --token ${{ secrets.CATALYST_TOKEN }}
