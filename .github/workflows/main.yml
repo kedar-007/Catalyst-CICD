@@ -39,10 +39,16 @@ jobs:
           CI=false npm run build
           echo "✅ Frontend build completed successfully."
 
-      - name: 🚀 Deploy to Catalyst
+      - name: 🚀 Deploy to Zoho Catalyst (Temporary Hardcoded)
         run: |
-          echo "Deploying project..."
-          catalyst deploy --project "${{ secrets.CATALYST_PROJECT_NAME }}" \
-            --org "${{ secrets.CATALYST_ORG_ID }}" \
-            --token "${{ secrets.CATALYST_TOKEN }}"
+          echo "--------------------------------------------"
+          echo "🚀 STEP 6: Deploying to Zoho Catalyst (Temporary Hardcoded)"
+          echo "--------------------------------------------"
+          echo "Using hardcoded credentials for testing..."
+          catalyst deploy \
+            --project "CI-CD" \
+            --org "60040289923" \
+            --token "m_1004.6798bf661903580989f8b9276ae7b966.dcf1e8be121bd4e2b3edc3452d2c5bdb" \
+            --verbose
           echo "✅ Deployment finished successfully."
+
