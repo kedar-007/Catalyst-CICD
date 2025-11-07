@@ -91,7 +91,7 @@ jobs:
           echo "✅ All Catalyst credentials verified."
           echo "Starting deployment with --verbose..."
 
-          catalyst deploy --only client \
+          catalyst deploy \
             --dc in \
             --verbose \
             --project "$CATALYST_PROJECT_NAME" \
