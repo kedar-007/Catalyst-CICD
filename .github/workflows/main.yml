@@ -64,11 +64,26 @@ jobs:
           echo "✅ Backend dependencies installed successfully."
           echo "--------------------------------------------"
 
-      # ===== 6️⃣ Deploy to Zoho Catalyst =====
+      # ===== 6️⃣ Show Folder & File Structure =====
+      - name: 📁 Show Project Structure
+        run: |
+          echo "--------------------------------------------"
+          echo "STEP 6: Showing Folder and File Structure"
+          echo "--------------------------------------------"
+          if command -v tree >/dev/null 2>&1; then
+            echo "Using 'tree' command to show structure..."
+            tree -a -I 'node_modules|.git'
+          else
+            echo "'tree' command not found, using 'find' instead..."
+            find . -type f ! -path "*/node_modules/*" ! -path "*/.git/*" | sort
+          fi
+          echo "--------------------------------------------"
+
+      # ===== 7️⃣ Deploy to Zoho Catalyst =====
       - name: Deploy to Zoho Catalyst (Hardcoded for Testing)
         run: |
           echo "--------------------------------------------"
-          echo "STEP 6: Deploying to Zoho Catalyst (Hardcoded)"
+          echo "STEP 7: Deploying to Zoho Catalyst (Hardcoded)"
           echo "--------------------------------------------"
 
           # 🔒 TEMPORARY HARD-CODED VALUES FOR TESTING
@@ -79,11 +94,10 @@ jobs:
           echo "Verifying Catalyst credentials..."
           echo "Project Name: $CATALYST_PROJECT_NAME"
           echo "Org ID:        $CATALYST_ORG"
-          echo "Token Length:  ${CATALYST_TOKEN}"
+          echo "Token Length:  ${#CATALYST_TOKEN}"
           echo "Current Commit: ${{ github.sha }}"
           echo "--------------------------------------------"
 
-          # Validate values
           if [ -z "$CATALYST_ORG" ] || [ -z "$CATALYST_PROJECT_NAME" ] || [ -z "$CATALYST_TOKEN" ]; then
             echo "❌ ERROR: Missing Catalyst credentials."
             exit 1
