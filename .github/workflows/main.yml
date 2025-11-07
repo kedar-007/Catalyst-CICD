@@ -8,88 +8,68 @@ on:
 jobs:
   build:
     environment: Production
-    name: Building and Deploying Catalyst App (Frontend + Backend)
+    name: Build, Test, and Deploy Catalyst App
     runs-on: ubuntu-latest
 
     steps:
-      # ===== 1️⃣ Clone Repository =====
-      - name: Cloning Repository
+      # 1️⃣ Clone Repository
+      - name: Clone Repository
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      # ===== 2️⃣ Setup Node =====
-      - name: Setting up Node 18
+      # 2️⃣ Setup Node
+      - name: Setup Node 18
         uses: actions/setup-node@v3
         with:
           node-version: '18'
 
-      # ===== 3️⃣ Install Catalyst CLI =====
-      - name: Installing Zoho Catalyst CLI
+      # 3️⃣ Install Zoho Catalyst CLI
+      - name: Install Zoho Catalyst CLI
         run: |
-          echo "--------------------------------------------"
-          echo "STEP 3: Installing Zoho Catalyst CLI"
-          echo "--------------------------------------------"
           npm install -g zcatalyst-cli@latest
-          echo "✅ Catalyst CLI installed successfully."
-          echo "--------------------------------------------"
-          echo "Checking Catalyst CLI version..."
-          catalyst --version || { echo '❌ Catalyst CLI not found!'; exit 1; }
-          echo "✅ Catalyst CLI verified successfully."
-          echo "--------------------------------------------"
+          catalyst --version
 
-      # ===== 4️⃣ Build React Frontend =====
-      - name: Building React Frontend
+      # 4️⃣ Run Frontend Tests
+      - name: Run Frontend Tests
         working-directory: ./react-app
         run: |
-          echo "--------------------------------------------"
-          echo "STEP 4: Building React Frontend"
-          echo "--------------------------------------------"
-          echo "Installing frontend dependencies..."
           npm ci
-          echo "✅ Frontend dependencies installed."
-          echo "Building React app for production..."
-          CI=false npm run build
-          echo "✅ Frontend build completed successfully."
-          echo "--------------------------------------------"
+          npm test -- --watchAll=false
 
-      # ===== 5️⃣ Install Backend Dependencies =====
-      - name: Installing Backend Dependencies
+      # 5️⃣ Run Backend Tests
+      - name: Run Backend Tests
         working-directory: ./functions/ci_cd_function
         run: |
-          echo "--------------------------------------------"
-          echo "STEP 5: Installing Backend Dependencies"
-          echo "--------------------------------------------"
-          npm ci --omit=dev
-          echo "✅ Backend dependencies installed successfully."
-          echo "--------------------------------------------"
+          npm ci
+          npm test
 
-      # ===== 7️⃣ Deploy to Zoho Catalyst =====
-      - name: Deploy to Zoho Catalyst (Using Secrets)
+      # 6️⃣ Build React Frontend
+      - name: Build React Frontend
+        working-directory: ./react-app
         run: |
-          echo "--------------------------------------------"
-          echo "STEP 7: Deploying to Zoho Catalyst (Using Secrets)"
-          echo "--------------------------------------------"
+          npm run build
 
-          # 🔒 Pull credentials from GitHub secrets
+      # 7️⃣ Install Backend Production Dependencies
+      - name: Install Backend Dependencies
+        working-directory: ./functions/ci_cd_function
+        run: |
+          npm ci --omit=dev
+
+      # 8️⃣ Deploy to Zoho Catalyst (only if tests pass)
+      - name: Deploy to Zoho Catalyst
+        if: success()   # Only runs if all previous steps pass
+        run: |
+          echo "Deploying to Zoho Catalyst..."
+
           CATALYST_PROJECT_NAME="${{ secrets.CATALYST_PROJECT_NAME }}"
           CATALYST_ORG="${{ secrets.CATALYST_ORG }}"
           CATALYST_TOKEN="${{ secrets.CATALYST_TOKEN }}"
 
-          echo "Verifying Catalyst credentials..."
-          echo "Project Name: $CATALYST_PROJECT_NAME"
-          echo "Org ID:        $CATALYST_ORG"
-          echo "Token Length:  ${#CATALYST_TOKEN}"
-          echo "Current Commit: ${{ github.sha }}"
-          echo "--------------------------------------------"
-
           if [ -z "$CATALYST_ORG" ] || [ -z "$CATALYST_PROJECT_NAME" ] || [ -z "$CATALYST_TOKEN" ]; then
-            echo "❌ ERROR: Missing Catalyst credentials."
+            echo "ERROR: Missing Catalyst credentials."
             exit 1
           fi
-
-          echo "✅ All Catalyst credentials verified."
-          echo "Starting deployment with --verbose..."
 
           catalyst deploy \
             --dc in \
@@ -98,5 +78,4 @@ jobs:
             --org "$CATALYST_ORG" \
             --token "$CATALYST_TOKEN"
 
-          echo "✅ Catalyst deployment completed successfully."
-          echo "--------------------------------------------"
+          echo "Catalyst deployment completed successfully."
