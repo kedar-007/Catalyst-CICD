@@ -65,15 +65,17 @@ jobs:
           echo "--------------------------------------------"
 
       # ===== 6️⃣ Deploy to Zoho Catalyst =====
-      - name: Deploy to Zoho Catalyst
-        env:
-          CATALYST_ORG: ${{ secrets.CATALYST_ORG || vars.CATALYST_ORG }}
-          CATALYST_PROJECT_NAME: ${{ secrets.CATALYST_PROJECT_NAME || vars.CATALYST_PROJECT_NAME }}
-          CATALYST_TOKEN: ${{ secrets.CATALYST_TOKEN || vars.CATALYST_TOKEN }}
+      - name: Deploy to Zoho Catalyst (Hardcoded for Testing)
         run: |
           echo "--------------------------------------------"
-          echo "STEP 6: Deploying to Zoho Catalyst"
+          echo "STEP 6: Deploying to Zoho Catalyst (Hardcoded)"
           echo "--------------------------------------------"
+
+          # 🔒 TEMPORARY HARD-CODED VALUES FOR TESTING
+          CATALYST_PROJECT_NAME="CI-CD"
+          CATALYST_ORG="60040289923"
+          CATALYST_TOKEN="m_1004.6798bf661903580989f8b9276ae7b966.dcf1e8be121bd4e2b3edc3452d2c5bdb"
+
           echo "Verifying Catalyst credentials..."
           echo "Project Name: $CATALYST_PROJECT_NAME"
           echo "Org ID:        $CATALYST_ORG"
@@ -81,9 +83,9 @@ jobs:
           echo "Current Commit: ${{ github.sha }}"
           echo "--------------------------------------------"
 
-          # Validate that required environment variables exist
+          # Validate values
           if [ -z "$CATALYST_ORG" ] || [ -z "$CATALYST_PROJECT_NAME" ] || [ -z "$CATALYST_TOKEN" ]; then
-            echo "❌ ERROR: Missing Catalyst credentials (Org / Project / Token)"
+            echo "❌ ERROR: Missing Catalyst credentials."
             exit 1
           fi
 
@@ -91,7 +93,7 @@ jobs:
           echo "Starting deployment..."
 
           catalyst deploy \
-            --dc in
+            --dc in \
             --project "$CATALYST_PROJECT_NAME" \
             --org "$CATALYST_ORG" \
             --token "$CATALYST_TOKEN"
