@@ -72,7 +72,7 @@ jobs:
           echo "--------------------------------------------"
 
           # 🔒 TEMPORARY HARD-CODED VALUES FOR TESTING
-          CATALYST_PROJECT_NAME="CI-CD"
+          CATALYST_PROJECT_NAME="17682000000454057"
           CATALYST_ORG="60040289923"
           CATALYST_TOKEN="m_1004.6798bf661903580989f8b9276ae7b966.dcf1e8be121bd4e2b3edc3452d2c5bdb"
 
