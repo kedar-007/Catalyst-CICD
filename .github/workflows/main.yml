@@ -65,16 +65,16 @@ jobs:
           echo "--------------------------------------------"
 
       # ===== 7️⃣ Deploy to Zoho Catalyst =====
-      - name: Deploy to Zoho Catalyst (Hardcoded for Testing)
+      - name: Deploy to Zoho Catalyst (Using Secrets)
         run: |
           echo "--------------------------------------------"
-          echo "STEP 7: Deploying to Zoho Catalyst (Hardcoded)"
+          echo "STEP 7: Deploying to Zoho Catalyst (Using Secrets)"
           echo "--------------------------------------------"
 
-          # 🔒 TEMPORARY HARD-CODED VALUES FOR TESTING
-          CATALYST_PROJECT_NAME="17682000000454057"
-          CATALYST_ORG="60040289923"
-          CATALYST_TOKEN="m_1004.6798bf661903580989f8b9276ae7b966.dcf1e8be121bd4e2b3edc3452d2c5bdb"
+          # 🔒 Pull credentials from GitHub secrets
+          CATALYST_PROJECT_NAME="${{ secrets.CATALYST_PROJECT_NAME }}"
+          CATALYST_ORG="${{ secrets.CATALYST_ORG }}"
+          CATALYST_TOKEN="${{ secrets.CATALYST_TOKEN }}"
 
           echo "Verifying Catalyst credentials..."
           echo "Project Name: $CATALYST_PROJECT_NAME"
@@ -91,7 +91,7 @@ jobs:
           echo "✅ All Catalyst credentials verified."
           echo "Starting deployment with --verbose..."
 
-          catalyst deploy --only client\
+          catalyst deploy --only client \
             --dc in \
             --verbose \
             --project "$CATALYST_PROJECT_NAME" \
