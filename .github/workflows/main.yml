@@ -79,6 +79,30 @@ jobs:
           fi
           echo "--------------------------------------------"
 
+          echo "📄 Displaying root catalyst.json:"
+          if [ -f catalyst.json ]; then
+            cat catalyst.json
+          else
+            echo "⚠ catalyst.json not found in root!"
+          fi
+
+          echo "--------------------------------------------"
+          echo "📄 Displaying backend catalyst-config.json:"
+          if [ -f functions/ci_cd_function/catalyst-config.json ]; then
+            cat functions/ci_cd_function/catalyst-config.json
+          else
+            echo "⚠ functions/ci_cd_function/catalyst-config.json not found!"
+          fi
+
+          echo "--------------------------------------------"
+          echo "📄 Displaying frontend client-package.json:"
+          if [ -f react-app/client-package.json ]; then
+            cat react-app/client-package.json
+          else
+            echo "⚠ react-app/client-package.json not found!"
+          fi
+          echo "--------------------------------------------"
+
       # ===== 7️⃣ Deploy to Zoho Catalyst =====
       - name: Deploy to Zoho Catalyst (Hardcoded for Testing)
         run: |
@@ -104,10 +128,11 @@ jobs:
           fi
 
           echo "✅ All Catalyst credentials verified."
-          echo "Starting deployment..."
+          echo "Starting deployment with --verbose..."
 
           catalyst deploy \
             --dc in \
+            --verbose \
             --project "$CATALYST_PROJECT_NAME" \
             --org "$CATALYST_ORG" \
             --token "$CATALYST_TOKEN"
