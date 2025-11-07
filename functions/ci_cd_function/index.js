@@ -13,4 +13,8 @@ app.get("/hi",(req,res) =>{
 	res.send("Hi Catalyst")
 })
 
+app.get("/testing",(req,res) =>{
+	res.send("Testing endpoint")
+})
+
 module.exports = app;
