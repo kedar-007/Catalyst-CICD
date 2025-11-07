@@ -79,7 +79,7 @@ jobs:
           echo "Verifying Catalyst credentials..."
           echo "Project Name: $CATALYST_PROJECT_NAME"
           echo "Org ID:        $CATALYST_ORG"
-          echo "Token Length:  ${#CATALYST_TOKEN}"
+          echo "Token Length:  ${CATALYST_TOKEN}"
           echo "Current Commit: ${{ github.sha }}"
           echo "--------------------------------------------"
 
