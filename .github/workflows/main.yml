@@ -64,45 +64,6 @@ jobs:
           echo "✅ Backend dependencies installed successfully."
           echo "--------------------------------------------"
 
-      # ===== 6️⃣ Show Folder & File Structure =====
-      - name: 📁 Show Project Structure
-        run: |
-          echo "--------------------------------------------"
-          echo "STEP 6: Showing Folder and File Structure"
-          echo "--------------------------------------------"
-          if command -v tree >/dev/null 2>&1; then
-            echo "Using 'tree' command to show structure..."
-            tree -a -I 'node_modules|.git'
-          else
-            echo "'tree' command not found, using 'find' instead..."
-            find . -type f ! -path "*/node_modules/*" ! -path "*/.git/*" | sort
-          fi
-          echo "--------------------------------------------"
-
-          echo "📄 Displaying root catalyst.json:"
-          if [ -f catalyst.json ]; then
-            cat catalyst.json
-          else
-            echo "⚠ catalyst.json not found in root!"
-          fi
-
-          echo "--------------------------------------------"
-          echo "📄 Displaying backend catalyst-config.json:"
-          if [ -f functions/ci_cd_function/catalyst-config.json ]; then
-            cat functions/ci_cd_function/catalyst-config.json
-          else
-            echo "⚠ functions/ci_cd_function/catalyst-config.json not found!"
-          fi
-
-          echo "--------------------------------------------"
-          echo "📄 Displaying frontend client-package.json:"
-          if [ -f react-app/client-package.json ]; then
-            cat react-app/client-package.json
-          else
-            echo "⚠ react-app/client-package.json not found!"
-          fi
-          echo "--------------------------------------------"
-
       # ===== 7️⃣ Deploy to Zoho Catalyst =====
       - name: Deploy to Zoho Catalyst (Hardcoded for Testing)
         run: |
@@ -130,7 +91,7 @@ jobs:
           echo "✅ All Catalyst credentials verified."
           echo "Starting deployment with --verbose..."
 
-          catalyst deploy \
+          catalyst deploy --only client\
             --dc in \
             --verbose \
             --project "$CATALYST_PROJECT_NAME" \
