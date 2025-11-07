@@ -91,6 +91,7 @@ jobs:
           echo "Starting deployment..."
 
           catalyst deploy \
+            --dc in
             --project "$CATALYST_PROJECT_NAME" \
             --org "$CATALYST_ORG" \
             --token "$CATALYST_TOKEN"
